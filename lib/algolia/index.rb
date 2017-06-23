@@ -409,7 +409,9 @@ module Algolia
       loop do
         res = search(query, params)
         break if res['hits'].empty?
-        res = delete_objects(res['hits'].map { |h| h['objectID'] })
+        ids = res['hits'].map { |h| h['objectID'] }
+        res = delete_objects(ids)
+        break if ids.size != 1000 # no need to wait_task if we had less than 1000 objects matching; we won't get more after anyway.
         wait_task res['taskID']
       end
     end
